@@ -6,6 +6,7 @@ const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 const passport = require('passport');
 const authenticate = require('./authenticate');
+const config = require('./config');
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -85,6 +86,8 @@ function auth(req, res, next) {
     return next();
   }
 }
+
+const url = config.mongoUrl;
 
 app.use(auth);
 

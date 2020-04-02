@@ -1,5 +1,6 @@
 const express = require('express');
 const Promotion = require('../models/promotions');
+const authenticate = require('../authenticate');
 
 
 const promotionRouter = express.router();
@@ -13,14 +14,14 @@ promotionRouter.route('/promotions')
 .get((req, res) => {
     res.end('Will send all the campsites to you');
 })
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.end(`Will add the campsite: ${req.body.name} with description: ${req.body.description}`);
 })
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /campsites');
 })
-.delete((req, res) => {
+.delete(authenticate.verifyUser, (req, res) => {
     res.end('Deleting all campsites');
 });
 
@@ -33,14 +34,14 @@ promotionRouter.route('/promotions/:promotionId')
 .get((req, res) => {
     res.end('Will send all the campsites to you');
 })
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.end(`Will add the campsite: ${req.body.name} with description: ${req.body.description}`);
 })
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /campsites');
 })
-.delete((req, res) => {
+.delete(authenticate.verifyUser, (req, res) => {
     res.end('Deleting all campsites');
 });
 
@@ -54,7 +55,7 @@ promotionRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Promotion.create(req.body)
     .then(promotions => {
         console.log('Partner Created ', promotions);
@@ -64,11 +65,11 @@ promotionRouter.route('/')
     })
     .catch(err => next(err));
 })
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /promotions');
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Promotion.deleteMany()
     .then(response => {
         res.statusCode = 200;

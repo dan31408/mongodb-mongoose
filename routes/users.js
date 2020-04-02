@@ -10,6 +10,13 @@ router.get('/', function(req, res, next) {
   res.send('respond with source');
 });
 
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  const token = authenticate.getToken({_id: req.user._id});
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.json({success: true, token: token, status: 'You are successfully logged in!'});
+});
+
 router.post('/signup', (req, res, next) => {
   User.findOne({username: req.body.username})
   .then(user => {
