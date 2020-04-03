@@ -15,8 +15,18 @@ exports.getToken = function(user) {
     return jwt.sign(user, config.secretKey, {expiresIn: 3600});
 };
 
-function verifyUser(admin) {
-    
+app.use(verifyAdmin);
+
+// week 3 workshop assignment
+function verifyAdmin(res, req, next) {
+    if (admin) {
+        user.admin = req.user.admin;
+        return next();
+    } else {
+       const err = new error(`Campsite ${req.params.campsiteId} You are not authorized to perfome this operation!`);
+        err.status = 403;
+        return next(err);
+    } 
 }
 
 const opts = {};
