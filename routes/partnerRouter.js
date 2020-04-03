@@ -1,49 +1,10 @@
 const express = require('express');
-const Partner = require('../models/Partners');
+const bodyParser = require('body-parser');
+const Partner = require('../models/partner'); 
+
 const authenticate = require('../authenticate');
-
-
-const partnerRouter = express.router();
-
-partnerRouter.route('/partners')
-.all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-})
-
-.get((req, res) => {
-    res.end('Will send all the campsites to you');
-})
-.post(authenticate.verifyUser, (req, res) => {
-    res.end(`Will add the campsite: ${req.body.name} with description: ${req.body.description}`);
-})
-.put(authenticate.verifyUser, (req, res) => {
-    res.statusCode = 403;
-    res.end('PUT operation not supported on /campsites');
-})
-.delete(authenticate.verifyUser, (req, res) => {
-    res.end('Deleting all campsites');
-});
-
-partnerRouter.route('/partners/:partnerId')
-.all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-})
-
-.get((req, res) => {
-    res.end('Will send all the campsites to you');
-})
-.post(authenticate.verifyUser, (req, res) => {
-    res.end(`Will add the campsite: ${req.body.name} with description: ${req.body.description}`);
-})
-.put(authenticate.verifyUser, (req, res) => {
-    res.statusCode = 403;
-    res.end('PUT operation not supported on /campsites');
-})
-.delete(authenticate.verifyUser, (req, res) => {
-    res.end('Deleting all campsites');
-});
+const partnerRouter = express.Router();
+partnerRouter.use(bodyParser.json());
 
 partnerRouter.route('/')
 .get((req, res, next) => {
@@ -51,17 +12,17 @@ partnerRouter.route('/')
     .then(partners => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(partners);
+        res.json(partners); 
     })
-    .catch(err => next(err));
+    .catch(err => next(err)); 
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-    Partner.create(req.body)
-    .then(campsite => {
-        console.log('Partner Created ', partners);
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    Partner.create(req.body) 
+    .then(partner => {
+        console.log('Partner Created ', partner);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(partners);
+        res.json(partner);
     })
     .catch(err => next(err));
 })
@@ -69,8 +30,45 @@ partnerRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /partners');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.deleteMany()
+    .then(response => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(response);
+    })
+    .catch(err => next(err));
+});
+
+//partner Id ------------
+
+partnerRouter.route('/:partnerId')
+.get((req, res, next) => {
+    Partner.findById(req.params.partnerId)
+    .then(partner => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(partner);
+    })
+    .catch(err => next(err));
+})
+.post(authenticate.verifyUser, (req, res) => {
+    res.statusCode = 403;
+    res.end(`POST operation not supported on /partner/${req.params.partnerId}`);
+})
+.put(authenticate.verifyUser,authenticate.verifyAdmin, (req, res, next) => {
+    Partner.findByIdAndUpdate(req.params.partnerId, {
+        $set: req.body // request body used for update
+    }, { new: true }) // new document added is true
+    .then(partner => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(partner);
+    })
+    .catch(err => next(err));
+})
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');

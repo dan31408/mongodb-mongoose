@@ -1,9 +1,10 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const Promotion = require('../models/promotions');
+
 const authenticate = require('../authenticate');
-
-
 const promotionRouter = express.router();
+promotionRouter.use(bodyParser.json());
 
 promotionRouter.route('/promotions')
 .all((req, res, next) => {
@@ -25,7 +26,7 @@ promotionRouter.route('/promotions')
     res.end('Deleting all campsites');
 });
 
-promotionRouter.route('/promotions/:promotionId')
+promotionRouter.route('/:promotionId')
 .all((req, res, next) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
@@ -55,7 +56,7 @@ promotionRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.create(req.body)
     .then(promotions => {
         console.log('Partner Created ', promotions);
@@ -69,7 +70,7 @@ promotionRouter.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /promotions');
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.deleteMany()
     .then(response => {
         res.statusCode = 200;
